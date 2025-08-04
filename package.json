@@ -13,7 +13,8 @@
     "prebuild": "NODE_ENV=production tsx src/app/scripts/genAntdCss.tsx",
     "postbuild": "NODE_ENV=development tsx src/app/scripts/genAntdCss.tsx",
     "docker:build": "DOCKER_BUILDKIT=1 docker build -t trustana-interview-app .",
-    "docker:run": "docker run -p 3000:3000 trustana-interview-app"
+    "docker:run": "docker run -p 3000:3000 trustana-interview-app",
+    "deploy:gcr": ". src/app/scripts/deploy.sh"
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
