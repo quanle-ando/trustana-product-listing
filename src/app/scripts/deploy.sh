@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# Exit immediately if a command exits with a non-zero status
+# Exit on errors
 set -e
+
+# Export variables from .env into the environment
+set -a
+source .env
+set +a
 
 # Build and push the Docker image for amd64 platform
 docker buildx build \
