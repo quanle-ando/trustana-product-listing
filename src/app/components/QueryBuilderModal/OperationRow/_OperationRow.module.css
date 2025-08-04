@@ -1,0 +1,40 @@
+.connectingLine {
+  border-top-width: 1px;
+  border-left-width: 1px;
+  position: absolute;
+  top: 19px;
+  bottom: -16px;
+  left: 10px;
+  right: 30px;
+  border-top-left-radius: 8px;
+
+  &:global(.first) {
+    top: 16px;
+  }
+
+  &:global(.exist-row) {
+    right: revert;
+    width: calc(23% + 170px);
+  }
+
+  &:global(.date-row) {
+    right: revert;
+    width: calc(23% + 400px);
+  }
+
+  &:global(.connect-to-prev) {
+    transform: scaleY(-1);
+    top: -16px;
+    bottom: calc(100% - 13px);
+
+    &:global(.is-last-op) {
+      bottom: calc(100% - 16px);
+    }
+  }
+}
+
+.andConnector {
+  position: absolute;
+  top: -28px;
+  background-color: white;
+}

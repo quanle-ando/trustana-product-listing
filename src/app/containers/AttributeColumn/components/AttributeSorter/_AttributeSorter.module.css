@@ -1,0 +1,8 @@
+.attributeSorter {
+  &&& {
+    :global(.ant-select-selection-item),
+    :global(.ant-select-selection-placeholder) {
+      font-size: 12px;
+    }
+  }
+}
