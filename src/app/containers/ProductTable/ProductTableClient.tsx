@@ -307,7 +307,7 @@ export default function ProductTableClient({
             }}
             showSorterTooltip
             rowKey="id"
-            // virtual={typeof vi === "undefined"}
+            virtual={typeof vi === "undefined"}
             columns={displayColumnsMapped}
           />
         </div>
