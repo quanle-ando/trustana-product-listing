@@ -10,11 +10,11 @@ const initialState = {
   selectedProductSkuIds: new Set<string>(),
 };
 
-type StoreType = typeof initialState;
+export type ProductStoreType = typeof initialState;
 
 export const useProductsStore = create<{
-  state: StoreType;
-  functions: { updateStore: (state: Partial<StoreType>) => void };
+  state: ProductStoreType;
+  functions: { updateStore: (state: Partial<ProductStoreType>) => void };
 }>((set) => ({
   state: {
     ...initialState,

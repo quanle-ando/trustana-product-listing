@@ -7,7 +7,6 @@ import {
 import { ValidSupplierAttributeForMatching } from "@/app/types/attribute";
 import { InternalQueryFilter } from "@/app/types/query-engine/common";
 import { formatObject } from "@/app/utils/formatObject";
-import { updateAttributeMap } from "@/app/containers/AttributeColumn/model/attributes.store";
 
 const MAX_THREADS = 4;
 
@@ -45,7 +44,6 @@ export async function fetchAllAttributesByKeys({
   )
     .then(flatten)
     .then((attributes) => {
-      updateAttributeMap(attributes);
       return attributes;
     });
 }

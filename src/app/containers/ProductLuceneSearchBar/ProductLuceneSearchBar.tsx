@@ -1,22 +1,32 @@
 "use client";
 
 import LuceneSearchBar from "@/app/components/LuceneSearchBar/LuceneSearchBar";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useProductQueryStore } from "./model/productQuery.store";
 import { twJoin } from "tailwind-merge";
 import { PicRightOutlined } from "@ant-design/icons";
 import QueryBuilderModal from "@/app/components/QueryBuilderModal/QueryBuilderModal";
 import { usePushLuceneQueryToUrl } from "@/app/utils/url-helpers/pushLuceneQueryToUrl.url-helper";
 
-export default function ProductLuceneSearchBar() {
+export default function ProductLuceneSearchBar({
+  initialQuery,
+}: {
+  initialQuery: string;
+}) {
   const { luceneQuery } = useProductQueryStore().state;
 
   const { pushLuceneQueryToUrl } = usePushLuceneQueryToUrl();
 
+  const [ready, setReady] = useState(false);
+
+  useEffect(function setComponentAsClientReady() {
+    setReady(true);
+  }, []);
+
   return (
     <div className={twJoin("flex", "flex-row", "gap-[16px]")}>
       <LuceneSearchBar
-        luceneQuery={luceneQuery}
+        luceneQuery={!ready ? initialQuery : luceneQuery}
         data-testid="product-lucene-textarea"
         setLuceneQuery={(val) => {
           useProductQueryStore

@@ -3,69 +3,31 @@ import { MappedAttributeType } from "../AttributeColumn/AttributeColumnServer";
 import { mapAttributeToColumn } from "../../utils/data-mapping/mapAttributeToColumn.util";
 import { mapProduct } from "../../utils/data-mapping/mapProduct.util";
 import { mapAttribute } from "../../utils/data-mapping/mapAttribute.util";
-import orderBy from "lodash/orderBy";
-import { useProductsStore } from "./model/products.store";
-import { fetchAllAttributesByKeys } from "@/app/services/helpers/fetchAllAttributesByKeys.api-helper";
-import {
-  fetchProducts,
-  PRODUCT_SIZE_LIMIT,
-} from "@/app/services/fetchProducts.api";
-import { isValidNumber } from "@/app/utils/isValidNumber";
-import { convertQueryStringToFilterObject } from "@/app/utils/query-parser/convertQueryStringToFilterObject.util";
-import { generateProductFilters } from "@/app/utils/query-parser/generateProductFilters.util";
+import { InternalQueryResponse } from "@/app/types/query-engine/common";
+import { Product } from "@/app/types/product";
+import { ProductStoreType } from "./model/products.store";
+import { use } from "react";
 
-const DEFAULT_COLUMNS = ["name", "brand"];
-
-export type QueryType = {
-  attributes?: string;
-  query?: string;
-  sort?: string;
-  sortDir?: string;
-  page?: string;
-  skuIds?: string;
-};
-
-export default async function ProductTableServer({
-  queries,
+export default function ProductTableServer({
+  promisedProductsResponse,
+  promisedSelectedAttributesResopnse,
+  initialColumnKeys,
+  initialPage,
+  initialSort,
 }: {
-  queries: QueryType;
+  promisedSelectedAttributesResopnse: Promise<MappedAttributeType[]>;
+  promisedProductsResponse: Promise<InternalQueryResponse<Product>>;
+  initialColumnKeys: string[];
+  initialPage: number;
+  initialSort: undefined | ProductStoreType["sort"];
 }) {
-  const { attributes, query, sort, sortDir, page } = queries;
-
-  const initialColumnKeys =
-    attributes?.split(",").map((key) => key.trim()) || DEFAULT_COLUMNS;
-
-  const initialColumnKeysMap = new Map(
-    initialColumnKeys.map((key, index) => [key, index])
-  );
-
-  const [productResponse, attributeResponses] = await Promise.all([
-    fetchProducts({
-      body: {
-        filter: !query
-          ? undefined
-          : generateProductFilters(
-              convertQueryStringToFilterObject({ luceneQuery: query })
-            ),
-        ...(sort && {
-          sort: {
-            field: sort,
-            order: sortDir === "descend" ? "DESC" : "ASC",
-          },
-        }),
-        pagination: {
-          limit: PRODUCT_SIZE_LIMIT,
-          offset: (isValidNumber(page) ? Number(page) : 0) * PRODUCT_SIZE_LIMIT,
-        },
-      },
-    }),
-    fetchAllAttributesByKeys({ attributeKeys: initialColumnKeys }),
-  ]);
+  const [productResponse, attributeResponses] = [
+    use(promisedProductsResponse),
+    use(promisedSelectedAttributesResopnse),
+  ];
 
   const attributeMap = new Map<string, MappedAttributeType>(
-    orderBy(attributeResponses, (attr) =>
-      Number(initialColumnKeysMap.get(attr.key))
-    ).map((attr) => {
+    attributeResponses.map((attr) => {
       return [attr.key, mapAttribute(attr)];
     })
   );
@@ -74,7 +36,7 @@ export default async function ProductTableServer({
     return mapProduct({
       index,
       pdt,
-      offset: useProductsStore.getState().state.page,
+      offset: initialPage,
     });
   });
 
@@ -89,6 +51,8 @@ export default async function ProductTableServer({
       initialColumnKeys={initialColumnKeys}
       initialAttributes={Array.from(attributeMap.values())}
       initialTotalCount={productResponse.total}
+      initialPage={initialPage}
+      initialSort={initialSort}
     />
   );
 }

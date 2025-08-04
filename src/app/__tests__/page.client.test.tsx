@@ -1,55 +1,30 @@
-import { render, screen } from "@testing-library/react";
-import ProductTableServer from "../containers/ProductTable/ProductTableServer";
+import { act, render, screen } from "@testing-library/react";
 import { debug } from "vitest-preview";
-import AttributeColumnServer from "../containers/AttributeColumn/AttributeColumnServer";
 import userEvent from "@testing-library/user-event";
 import { sleep } from "@/app/utils/test-utils/sleep";
 import Main from "@/app/pages/Main/Main";
 
-vi.mock(
-  import("../containers/ProductTable/ProductTableClient"),
-  async (importOrig) => {
-    const Component = (await importOrig()).default;
-    return {
-      default: (props) => {
-        return <Component {...props} />;
-      },
-    };
-  }
-);
-
-vi.mock(
-  import("../containers/AttributeColumn/AttributeColumnClient"),
-  async (importOrig) => {
-    const Component = (await importOrig()).default;
-    return {
-      default: (props) => {
-        return <Component {...props} />;
-      },
-    };
-  }
-);
-
 describe("Page.client", () => {
   it("should render client page and handle all interactions correctly", async () => {
-    const productClient = await ProductTableServer({
-      queries: {
-        attributes: ["name", "brand", "_basicInfoRtfGeneralDescription"].join(
-          ","
-        ),
-      },
+    await act(async () => {
+      render(
+        <Main
+          queries={{
+            attributes: [
+              "name",
+              "brand",
+              "_basicInfoRtfGeneralDescription",
+            ].join(","),
+          }}
+        />
+      );
     });
-    const attributeClient = await AttributeColumnServer();
 
-    render(
-      <Main
-        clientRouter={null}
-        attributeClient={attributeClient}
-        productClient={productClient}
-      />
+    await screen.findByText(
+      "Displaying 300 product(s) with 3 attributes",
+      {},
+      { timeout: 10_000 }
     );
-
-    await screen.findByText("Displaying 300 product(s) with 3 attributes");
     await userEvent.click(
       await screen.findByPlaceholderText(
         "Query by attributes, e.g. brand:(Apple OR Spartan) name:reqexp(apple) netWeightPerUnitValue>=10 NOT amazonDietType:Vegetarian"

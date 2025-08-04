@@ -1,3 +1,5 @@
+"use client";
+
 import { twJoin } from "tailwind-merge";
 import { useColumnsStore } from "../../../ProductTable/model/columns.store";
 import { mapAttributeToColumn } from "../../../../utils/data-mapping/mapAttributeToColumn.util";

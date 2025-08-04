@@ -2,6 +2,7 @@ import { renderToReadableStream } from "react-dom/server.browser";
 import Home from "../page";
 import { debug } from "vitest-preview";
 import { screen } from "@testing-library/react";
+import RootLayout from "../layout";
 
 async function streamToString(stream: ReadableStream): Promise<string> {
   const reader = stream.getReader();
@@ -17,20 +18,12 @@ async function streamToString(stream: ReadableStream): Promise<string> {
   return result;
 }
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    pathname: "/",
-    query: {},
-    // add any router props you need for the test
-  }),
-}));
-
 describe("Page.server", () => {
   it("renders Server Component with Client Component placeholder", async () => {
     const stream = await renderToReadableStream(
-      <Home searchParams={Promise.resolve({})} />
+      <RootLayout>
+        <Home searchParams={Promise.resolve({})} />
+      </RootLayout>
     );
 
     const html = await streamToString(stream);
@@ -38,7 +31,7 @@ describe("Page.server", () => {
     document.body.innerHTML = html;
 
     expect(
-      await screen.findByTestId("loading-product-table-client")
+      await screen.findByText("Displaying 300 product(s) with 2 attributes")
     ).toBeInTheDocument();
 
     expect(

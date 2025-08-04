@@ -56,3 +56,18 @@ vi.mock(import("@/app/hooks/useIntersectionObserver"), async () => {
 vi.mock("next/headers", () => ({
   headers: () => new Map([["x-request-id", "mock-id"]]),
 }));
+
+vi.mock("next/font/google", () => ({
+  Geist: () => ({ className: "font-geist" }),
+  Geist_Mono: () => ({ className: "font-geist-mono" }),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    pathname: "/",
+    query: {},
+  }),
+  useSearchParams: vi.fn(() => ""),
+}));

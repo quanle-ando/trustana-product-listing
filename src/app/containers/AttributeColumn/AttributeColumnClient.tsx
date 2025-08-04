@@ -17,15 +17,37 @@ import { fetchAttributesClient } from "@/app/services/helpers/fetchAttributesCli
 
 export default function AttributeColumnClient({
   initialAttributes,
+  initialSelectedAttributes,
   initialTotal,
   initialAttributeMap,
 }: {
   initialAttributes: MappedAttributeType[];
+  initialSelectedAttributes: MappedAttributeType[];
   initialTotal: number;
   initialAttributeMap: Map<string, MappedAttributeType>;
 }) {
-  const { selectedAttributes, attributeMap, isAttributeQueryBarFocused } =
-    useAttributesStore().state;
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setReady(true);
+  }, []);
+
+  const attributeStore = useAttributesStore().state;
+  const { isAttributeQueryBarFocused } = attributeStore;
+
+  const selectedAttributes = useMemo(
+    () =>
+      !ready
+        ? new Set(initialSelectedAttributes.map((attr) => attr.key))
+        : attributeStore.selectedAttributes,
+    [attributeStore.selectedAttributes, initialSelectedAttributes, ready]
+  );
+
+  const attributeMap = useMemo(
+    () => (!ready ? initialAttributeMap : attributeStore.attributeMap),
+    [attributeStore.attributeMap, initialAttributeMap, ready]
+  );
+
   const {
     searchedAttributesMap,
     isSearchingAttributes,
@@ -35,8 +57,11 @@ export default function AttributeColumnClient({
   } = useSearchedAttributesStore().state;
 
   const filteredItems = useMemo(
-    () => Array.from(searchedAttributesMap.values()),
-    [searchedAttributesMap]
+    () =>
+      Array.from(
+        (!ready ? initialAttributeMap : searchedAttributesMap).values()
+      ),
+    [initialAttributeMap, ready, searchedAttributesMap]
   );
 
   useEffect(() => {
@@ -51,12 +76,6 @@ export default function AttributeColumnClient({
       total: initialTotal,
     });
   }, [initialAttributeMap, initialTotal]);
-
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    setReady(true);
-  }, []);
 
   const { targetRef } = useIntersectionObserver({
     onIntersecting() {
@@ -73,10 +92,6 @@ export default function AttributeColumnClient({
       }
     },
   });
-
-  if (!ready) {
-    return <Skeleton active />;
-  }
 
   return (
     <div

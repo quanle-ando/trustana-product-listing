@@ -1,3 +1,4 @@
+import "@ant-design/v5-patch-for-react-19";
 import "./antd.min.css";
 import "./globals.css";
 import type { Metadata } from "next";

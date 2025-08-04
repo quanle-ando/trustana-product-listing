@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:dev": "vitest --run",
+    "test:dev": "NODE_ENV=test vitest --run",
     "test": "NODE_ENV=test vitest --run --coverage",
     "typecheck": "tsc",
     "prebuild": "NODE_ENV=production tsx src/app/scripts/genAntdCss.tsx",

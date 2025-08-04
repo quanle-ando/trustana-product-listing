@@ -20,18 +20,18 @@ export function rehydrateStoresWithQueryParams({
 }) {
   const { attributes, query, sort, sortDir, page } = queries;
 
-  useProductQueryStore.getState().functions.updateStore({
-    luceneQuery: query,
-    filters: !query
-      ? undefined
-      : convertQueryStringToFilterObject({ luceneQuery: query }),
-  });
+  if (query) {
+    useProductQueryStore.getState().functions.updateStore({
+      luceneQuery: query,
+      filters: convertQueryStringToFilterObject({ luceneQuery: query }),
+    });
+  }
 
-  useAttributesStore.getState().functions.updateStore({
-    selectedAttributes: !attributes
-      ? useAttributesStore.getInitialState().state.selectedAttributes
-      : new Set(attributes.split(",")),
-  });
+  if (attributes) {
+    useAttributesStore.getState().functions.updateStore({
+      selectedAttributes: new Set(attributes.split(",")),
+    });
+  }
 
   if (sort) {
     useProductsStore.getState().functions.updateStore({

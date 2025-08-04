@@ -10,7 +10,7 @@ import {
 import { useColumnsStore } from "./model/columns.store";
 import { MappedAttributeType } from "../AttributeColumn/AttributeColumnServer";
 import { MappedColumnType } from "../../utils/data-mapping/mapAttributeToColumn.util";
-import { useProductsStore } from "./model/products.store";
+import { ProductStoreType, useProductsStore } from "./model/products.store";
 import { MappedProductType } from "../../utils/data-mapping/mapProduct.util";
 import RenderProductAttribute from "./components/RenderProductAttribute/RenderProductAttribute";
 import { castArray } from "lodash";
@@ -20,6 +20,7 @@ import SelectCheckbox from "./components/SelectCheckbox/SelectCheckbox";
 import RowSelectionCaretDropdownHeader from "./components/RowSelectionCaretDropdownHeader/RowSelectionCaretDropdownHeader";
 import { shareSkuIdsQueryParamsFormatter } from "@/app/utils/url-helpers/shareSkuIdsQueryParamsFormatter.url-helper";
 import { PRODUCT_SIZE_LIMIT } from "@/app/services/fetchProducts.api";
+import { formatObject } from "@/app/utils/formatObject";
 
 const HEADER_HEIGHT = 55; // From Ant Design
 
@@ -29,32 +30,49 @@ export default function ProductTableClient({
   initialColumnKeys,
   initialAttributes,
   initialTotalCount,
+  initialSort,
+  initialPage,
 }: {
   initialData: MappedProductType[];
   initialColumns: MappedColumnType[];
   initialColumnKeys: string[];
   initialAttributes: MappedAttributeType[];
   initialTotalCount: number;
+  initialSort: undefined | { field: string; dir: "ascend" | "descend" };
+  initialPage: number;
 }) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(function setComponentAsClientReady() {
+    setReady(true);
+  }, []);
+
   const [size, setSize] = useState({ width: 100, height: 100 });
   const { displayColumns } = useColumnsStore().state;
 
-  const {
-    products,
-    isLoadingProducts,
-    totalCount,
-    page,
-    sort,
-    selectedProductSkuIds,
-  } = useProductsStore().state;
+  const productStore = useProductsStore().state;
+
+  const { products, sort, totalCount } = useMemo(
+    () =>
+      !ready
+        ? formatObject<
+            Pick<ProductStoreType, "products" | "sort" | "totalCount">
+          >({
+            products: initialData,
+            sort: initialSort,
+            totalCount: initialTotalCount,
+          })
+        : productStore,
+    [initialData, initialSort, initialTotalCount, productStore, ready]
+  );
 
   const dataMapped = useMemo(() => {
-    return products.map((datum) => {
+    return (!ready ? initialData : products).map((datum) => {
       return {
         ...datum,
         __hasMoreRow__: false,
         ...Object.fromEntries(
-          displayColumns.map((attr) => {
+          (!ready ? initialColumns : displayColumns).map((attr) => {
             const { dataIndex } = attr;
 
             const value = datum[dataIndex as keyof MappedProductType];
@@ -64,7 +82,7 @@ export default function ProductTableClient({
         ),
       };
     });
-  }, [displayColumns, products]);
+  }, [displayColumns, initialColumns, initialData, products, ready]);
 
   useEffect(
     function rehydrateColumnsStore() {
@@ -80,9 +98,10 @@ export default function ProductTableClient({
       useProductsStore.getState().functions.updateStore({
         products: initialData,
         totalCount: initialTotalCount,
+        page: initialPage,
       });
     },
-    [initialData, initialTotalCount]
+    [initialData, initialTotalCount, initialPage]
   );
 
   useEffect(
@@ -146,7 +165,7 @@ export default function ProductTableClient({
         sortOrder: sort?.field === "updatedAt" ? sort.dir : null,
       },
 
-      ...displayColumns.map((col) => {
+      ...(!ready ? initialColumns : displayColumns).map((col) => {
         return {
           ...col,
           title: (
@@ -177,24 +196,12 @@ export default function ProductTableClient({
         },
       },
     ],
-    [displayColumns, sort?.dir, sort?.field]
+    [displayColumns, initialColumns, ready, sort?.dir, sort?.field]
   );
-
-  const [ready, setReady] = useState(false);
-
-  useEffect(function setComponentAsClientReady() {
-    setReady(true);
-  }, []);
 
   const { pushLuceneQueryToUrl } = usePushLuceneQueryToUrl();
 
-  if (!ready) {
-    return (
-      <div data-testid="loading-product-table-client">
-        <Skeleton active />
-      </div>
-    );
-  }
+  const { selectedProductSkuIds, isLoadingProducts, page } = productStore;
 
   return (
     <>
@@ -209,7 +216,10 @@ export default function ProductTableClient({
       >
         <div className={twJoin("flex-1", "overflow-hidden")}>
           Displaying {Intl.NumberFormat().format(totalCount)} product(s) with{" "}
-          {Intl.NumberFormat().format(displayColumns.length)} attributes
+          {Intl.NumberFormat().format(
+            !ready ? initialColumnKeys.length : displayColumns.length
+          )}{" "}
+          attributes
         </div>
 
         {!selectedProductSkuIds.size ? null : (
@@ -232,69 +242,76 @@ export default function ProductTableClient({
           </div>
         )}
       </div>
-      <div
-        className={twJoin("flex-1", "overflow-hidden")}
-        ref={(ref) => {
-          if (!ref) {
-            return;
-          }
-          const observer = new ResizeObserver((entries) => {
-            for (const entry of entries) {
-              const { width, height } = entry.contentRect;
-              setSize((cur) =>
-                cur.height === height && cur.width === width
-                  ? cur
-                  : { height: height, width: width }
-              );
+
+      {!ready ? (
+        <div data-testid="placeholder-for-product-table">
+          <Skeleton active />
+        </div>
+      ) : (
+        <div
+          className={twJoin("flex-1", "overflow-hidden")}
+          ref={(ref) => {
+            if (!ref) {
+              return;
             }
-          });
-
-          observer.observe(ref);
-        }}
-      >
-        <Table
-          bordered
-          scroll={{
-            scrollToFirstRowOnChange: true,
-            x: size.width,
-            y: size.height - HEADER_HEIGHT - 100,
-          }}
-          loading={isLoadingProducts}
-          dataSource={dataMapped}
-          pagination={{
-            current: page + 1,
-            total: totalCount,
-            pageSize: PRODUCT_SIZE_LIMIT,
-            showSizeChanger: false,
-          }}
-          onChange={(pagination, _b, sorters) => {
-            const sorter = castArray(sorters).at(0);
-            const field =
-              // @ts-expect-error -- __sortKey is a custom value
-              sorter?.column?.__sortKey || sorter?.field;
-
-            const updateProductStore =
-              useProductsStore.getState().functions.updateStore;
-
-            updateProductStore({
-              page: Math.max(0, (pagination.current || 0) - 1),
+            const observer = new ResizeObserver((entries) => {
+              for (const entry of entries) {
+                const { width, height } = entry.contentRect;
+                setSize((cur) =>
+                  cur.height === height && cur.width === width
+                    ? cur
+                    : { height: height, width: width }
+                );
+              }
             });
 
-            if (!field || !sorter.order) {
-              updateProductStore({ sort: undefined });
-            } else {
-              updateProductStore({
-                sort: { field: String(field), dir: sorter.order },
-              });
-            }
-            pushLuceneQueryToUrl();
+            observer.observe(ref);
           }}
-          showSorterTooltip
-          rowKey="id"
-          virtual={typeof vi === "undefined"}
-          columns={displayColumnsMapped}
-        />
-      </div>
+        >
+          <Table
+            bordered
+            scroll={{
+              scrollToFirstRowOnChange: true,
+              x: size.width,
+              y: size.height - HEADER_HEIGHT - 100,
+            }}
+            loading={isLoadingProducts}
+            dataSource={dataMapped}
+            pagination={{
+              current: page + 1,
+              total: totalCount,
+              pageSize: PRODUCT_SIZE_LIMIT,
+              showSizeChanger: false,
+            }}
+            onChange={(pagination, _b, sorters) => {
+              const sorter = castArray(sorters).at(0);
+              const field =
+                // @ts-expect-error -- __sortKey is a custom value
+                sorter?.column?.__sortKey || sorter?.field;
+
+              const updateProductStore =
+                useProductsStore.getState().functions.updateStore;
+
+              updateProductStore({
+                page: Math.max(0, (pagination.current || 0) - 1),
+              });
+
+              if (!field || !sorter.order) {
+                updateProductStore({ sort: undefined });
+              } else {
+                updateProductStore({
+                  sort: { field: String(field), dir: sorter.order },
+                });
+              }
+              pushLuceneQueryToUrl();
+            }}
+            showSorterTooltip
+            rowKey="id"
+            // virtual={typeof vi === "undefined"}
+            columns={displayColumnsMapped}
+          />
+        </div>
+      )}
     </>
   );
 }
