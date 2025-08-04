@@ -63,7 +63,8 @@ export default function LuceneSearchBar({
 
         setLuceneQuery(newValue);
       }}
-      autoSize={typeof vi === "undefined"}
+      autoSize={{ maxRows: 4 }}
+      rows={1}
       placeholder={placeholder}
       onChange={(e) => {
         setLuceneQuery(e.target.value);

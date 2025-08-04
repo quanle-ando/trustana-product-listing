@@ -3,6 +3,7 @@ import AttributeColumnClient from "./AttributeColumnClient";
 import { ArrayElement } from "@/app/types/typeUtils";
 import keyBy from "lodash/keyBy";
 import { use } from "react";
+import { InternalQueryResponse } from "@/app/types/query-engine/common";
 
 export type MappedAttributeType = ArrayElement<
   Awaited<ReturnType<typeof fetchAttributes>>["data"]
@@ -13,7 +14,9 @@ export default function AttributeColumnServer({
   promisedAttributesResopnse,
 }: {
   promisedSelectedAttributesResopnse: Promise<MappedAttributeType[]>;
-  promisedAttributesResopnse: Promise<MappedAttributeType[]>;
+  promisedAttributesResopnse: Promise<
+    InternalQueryResponse<MappedAttributeType>
+  >;
 }) {
   const [initialAttributes, initialSelectedAttributes] = [
     use(promisedAttributesResopnse),
@@ -22,16 +25,16 @@ export default function AttributeColumnServer({
 
   const attributeMap = new Map(
     Object.entries(
-      keyBy([...initialAttributes, ...initialSelectedAttributes], "key")
+      keyBy([...initialAttributes.data, ...initialSelectedAttributes], "key")
     )
   );
 
   return (
     <AttributeColumnClient
       initialSelectedAttributes={initialSelectedAttributes}
-      initialAttributes={initialAttributes}
-      initialTotal={attributeMap.size}
+      initialTotal={initialAttributes.total}
       initialAttributeMap={attributeMap}
+      initialTotalAttributeCount={initialAttributes.total}
     />
   );
 }

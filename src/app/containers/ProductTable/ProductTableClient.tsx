@@ -115,7 +115,7 @@ export default function ProductTableClient({
 
   useEffect(
     function rehydrateAttributeMap() {
-      updateAttributeMap(initialAttributes);
+      updateAttributeMap(initialAttributes, initialAttributes.length);
     },
     [initialAttributes]
   );

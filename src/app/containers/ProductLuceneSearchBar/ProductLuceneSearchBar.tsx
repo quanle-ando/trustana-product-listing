@@ -24,7 +24,7 @@ export default function ProductLuceneSearchBar({
   }, []);
 
   return (
-    <div className={twJoin("flex", "flex-row", "gap-[16px]")}>
+    <div className={twJoin("flex", "flex-row", "gap-[16px]", "items-center")}>
       <LuceneSearchBar
         luceneQuery={!ready ? initialQuery : luceneQuery}
         data-testid="product-lucene-textarea"

@@ -8,6 +8,7 @@ const initialState = {
   selectedAttributes: new Set<string>(["name", "brand"]),
   attributeMap: new Map<string, MappedAttributeType>(),
   isAttributeQueryBarFocused: false,
+  totalCountOfAllAtributes: 0,
 };
 
 type StoreType = typeof initialState;
@@ -27,9 +28,12 @@ export const useAttributesStore = create<{
 }));
 
 export function updateAttributeMap(
-  attributes: MappedAttributeType[] | MapIterator<MappedAttributeType>
+  attributes: MappedAttributeType[] | MapIterator<MappedAttributeType>,
+  totalCount: number
 ) {
-  const attributeMap = useAttributesStore.getState().state.attributeMap;
+  const state = useAttributesStore.getState().state;
+
+  const attributeMap = state.attributeMap;
 
   attributes.forEach((attr) => {
     attributeMap.set(attr.key, attr);
@@ -37,7 +41,13 @@ export function updateAttributeMap(
 
   useAttributesStore
     .getState()
-    .functions.updateStore({ attributeMap: new Map(attributeMap) });
+    .functions.updateStore({
+      attributeMap: new Map(attributeMap),
+      totalCountOfAllAtributes: Math.max(
+        state.totalCountOfAllAtributes,
+        totalCount
+      ),
+    });
 }
 
 export type PartialAttributePropsType = Pick<

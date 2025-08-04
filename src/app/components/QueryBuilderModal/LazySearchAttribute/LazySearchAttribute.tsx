@@ -142,7 +142,7 @@ export default function LazySearchAttribute({
                   });
                 };
 
-            updateAttributeMap(res.data);
+            updateAttributeMap(res.data, res.total);
           })
           .finally(() => {
             resolve();

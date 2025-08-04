@@ -11,7 +11,7 @@ const initialState = {
     | undefined,
   page: 0,
   hasMore: true,
-  total: 0,
+  totalCountOfSearchedAttributes: 0,
   sort: undefined as undefined | { key: string; dir: "ASC" | "DESC" },
 };
 

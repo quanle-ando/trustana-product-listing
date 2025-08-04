@@ -72,7 +72,7 @@ export default function Main({ queries }: { queries: QueryType }) {
     body: JSON.stringify({
       sort: { field: "group", order: "ASC" },
     }),
-  }).then((res) => res.data);
+  });
 
   return (
     <div

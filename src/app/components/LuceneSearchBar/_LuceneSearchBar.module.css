@@ -1,5 +1,9 @@
 .luceneSearchBar {
-  &&& textarea {
-    font-size: 12px;
+  &&& {
+    padding: 0;
+
+    textarea {
+      transition: none;
+    }
   }
 }

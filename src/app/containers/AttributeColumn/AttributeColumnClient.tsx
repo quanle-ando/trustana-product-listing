@@ -16,15 +16,15 @@ import { useIntersectionObserver } from "@/app/hooks/useIntersectionObserver";
 import { fetchAttributesClient } from "@/app/services/helpers/fetchAttributesClient.api-helper";
 
 export default function AttributeColumnClient({
-  initialAttributes,
   initialSelectedAttributes,
   initialTotal,
   initialAttributeMap,
+  initialTotalAttributeCount,
 }: {
-  initialAttributes: MappedAttributeType[];
   initialSelectedAttributes: MappedAttributeType[];
   initialTotal: number;
   initialAttributeMap: Map<string, MappedAttributeType>;
+  initialTotalAttributeCount: number;
 }) {
   const [ready, setReady] = useState(false);
 
@@ -33,7 +33,8 @@ export default function AttributeColumnClient({
   }, []);
 
   const attributeStore = useAttributesStore().state;
-  const { isAttributeQueryBarFocused } = attributeStore;
+  const { isAttributeQueryBarFocused, totalCountOfAllAtributes } =
+    attributeStore;
 
   const selectedAttributes = useMemo(
     () =>
@@ -48,13 +49,20 @@ export default function AttributeColumnClient({
     [attributeStore.attributeMap, initialAttributeMap, ready]
   );
 
+  const store = useSearchedAttributesStore().state;
+
   const {
     searchedAttributesMap,
     isSearchingAttributes,
     isSearchingFirstAttributes,
     hasMore,
-    total,
-  } = useSearchedAttributesStore().state;
+    totalCountOfSearchedAttributes,
+  } = store;
+
+  const totalSearchedAttributeCount = useMemo(
+    () => (!ready ? initialTotal : totalCountOfSearchedAttributes),
+    [initialTotal, ready, totalCountOfSearchedAttributes]
+  );
 
   const filteredItems = useMemo(
     () =>
@@ -65,15 +73,17 @@ export default function AttributeColumnClient({
   );
 
   useEffect(() => {
-    updateAttributeMap(initialAttributes);
-    updateAttributeMap(initialAttributeMap.values());
-  }, [initialAttributeMap, initialAttributes]);
+    updateAttributeMap(
+      initialAttributeMap.values(),
+      initialTotalAttributeCount
+    );
+  }, [initialAttributeMap, initialTotalAttributeCount]);
 
   useEffect(() => {
     useSearchedAttributesStore.getState().functions.updateStore({
       searchedAttributesMap: initialAttributeMap,
       page: 0,
-      total: initialTotal,
+      totalCountOfSearchedAttributes: initialTotal,
     });
   }, [initialAttributeMap, initialTotal]);
 
@@ -161,7 +171,8 @@ export default function AttributeColumnClient({
         <div>
           <label>
             <b>
-              Attributes ({total} / {initialTotal})
+              Attributes ({totalSearchedAttributeCount} /{" "}
+              {!ready ? initialTotalAttributeCount : totalCountOfAllAtributes})
             </b>
           </label>
         </div>
@@ -188,7 +199,9 @@ export default function AttributeColumnClient({
           return <AttributeTabRender attribute={attr} key={attr.key} />;
         })}
 
-        {isSearchingAttributes && <Skeleton active paragraph={{ rows: 2 }} />}
+        {isSearchingAttributes && !isSearchingFirstAttributes && (
+          <Skeleton active paragraph={{ rows: 2 }} />
+        )}
 
         {isSearchingFirstAttributes && (
           <div

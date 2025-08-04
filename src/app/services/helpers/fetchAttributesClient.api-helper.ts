@@ -45,11 +45,11 @@ export async function fetchAttributesClient() {
 
       useSearchedAttributesStore.getState().functions.updateStore({
         searchedAttributesMap: newData,
-        total: response.total,
+        totalCountOfSearchedAttributes: response.total,
         hasMore: response.pagination.hasMore,
       });
 
-      updateAttributeMap(response.data);
+      updateAttributeMap(response.data, response.total);
     })
     .finally(() => {
       useSearchedAttributesStore.getState().functions.updateStore({
