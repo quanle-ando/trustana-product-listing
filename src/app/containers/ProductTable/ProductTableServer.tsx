@@ -1,51 +1,65 @@
-import {
-  SupplierAttribute,
-  ValidSupplierAttributeForMatching,
-} from "@/app/types/attribute";
-import {
-  InternalQueryFilter,
-  InternalQueryResponse,
-} from "@/app/types/query-engine/common";
-import { formatObject } from "@/app/utils/formatObject";
 import ProductTableClient from "./ProductTableClient";
-import { BASE_URL } from "@/app/constants/BASE_URL";
 import { MappedAttributeType } from "../AttributeColumn/AttributeColumnServer";
 import { mapAttributeToColumn } from "../../utils/data-mapping/mapAttributeToColumn.util";
 import { mapProduct } from "../../utils/data-mapping/mapProduct.util";
 import { mapAttribute } from "../../utils/data-mapping/mapAttribute.util";
-import { useAttributesStore } from "../AttributeColumn/model/attributes.store";
-import { fetchProductsUsingCurrentConditions } from "@/app/services/helpers/fetchProductsUsingCurrentConditions.api-helper";
 import orderBy from "lodash/orderBy";
 import { useProductsStore } from "./model/products.store";
+import { fetchAllAttributesByKeys } from "@/app/services/helpers/fetchAllAttributesByKeys.api-helper";
+import {
+  fetchProducts,
+  PRODUCT_SIZE_LIMIT,
+} from "@/app/services/fetchProducts.api";
+import { isValidNumber } from "@/app/utils/isValidNumber";
+import { convertQueryStringToFilterObject } from "@/app/utils/query-parser/convertQueryStringToFilterObject.util";
+import { generateProductFilters } from "@/app/utils/query-parser/generateProductFilters.util";
 
-export default async function ProductTableServer() {
-  const initialColumnKeys = Array.from(
-    useAttributesStore.getState().state.selectedAttributes
-  );
+const DEFAULT_COLUMNS = ["name", "brand"];
+
+export type QueryType = {
+  attributes?: string;
+  query?: string;
+  sort?: string;
+  sortDir?: string;
+  page?: string;
+  skuIds?: string;
+};
+
+export default async function ProductTableServer({
+  queries,
+}: {
+  queries: QueryType;
+}) {
+  const { attributes, query, sort, sortDir, page } = queries;
+
+  const initialColumnKeys =
+    attributes?.split(",").map((key) => key.trim()) || DEFAULT_COLUMNS;
 
   const initialColumnKeysMap = new Map(
     initialColumnKeys.map((key, index) => [key, index])
   );
 
   const [productResponse, attributeResponses] = await Promise.all([
-    fetchProductsUsingCurrentConditions(),
-
-    fetch(`${BASE_URL}/api/attributes`, {
-      method: "POST",
-      body: JSON.stringify({
-        filter: formatObject<
-          InternalQueryFilter<ValidSupplierAttributeForMatching>
-        >({
-          key: {
-            $in: initialColumnKeys,
+    fetchProducts({
+      body: {
+        filter: !query
+          ? undefined
+          : generateProductFilters(
+              convertQueryStringToFilterObject({ luceneQuery: query })
+            ),
+        ...(sort && {
+          sort: {
+            field: sort,
+            order: sortDir === "descend" ? "DESC" : "ASC",
           },
         }),
-      }),
-    })
-      .then(
-        (res) => res.json() as Promise<InternalQueryResponse<SupplierAttribute>>
-      )
-      .then((res) => res.data),
+        pagination: {
+          limit: PRODUCT_SIZE_LIMIT,
+          offset: (isValidNumber(page) ? Number(page) : 0) * PRODUCT_SIZE_LIMIT,
+        },
+      },
+    }),
+    fetchAllAttributesByKeys({ attributeKeys: initialColumnKeys }),
   ]);
 
   const attributeMap = new Map<string, MappedAttributeType>(

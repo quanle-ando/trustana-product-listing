@@ -1,16 +1,37 @@
-import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
-
-const TRACKING_ID = nanoid();
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
-  response.headers.set("x-tracking-id", TRACKING_ID);
+
+  // Set CSP header
+  response.headers.set(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src * blob: data:",
+      "font-src 'self'",
+      "connect-src *",
+      "frame-src 'none'",
+    ].join("; ")
+  );
 
   const cookie = request.cookies.get("session-id");
 
   if (!cookie) {
-    // Generate a new session ID (e.g. UUID or random string)
+    /**
+     * Handling of unauthorized access. Normal flow:
+     * - User will need to login.
+     * - When login action is dispatched, session-id will be set.
+     * - From then on, session-id cookie must be present in all calls.
+     * - If cookie is not present, redirect to login or unauthorized page.
+     */
+    // return NextResponse.redirect(new URL("/unauthorized", request.url));
+
+    /**
+     * This will be the flow when login action is successful
+     */
     const sessionId = crypto.randomUUID();
 
     response.cookies.set({

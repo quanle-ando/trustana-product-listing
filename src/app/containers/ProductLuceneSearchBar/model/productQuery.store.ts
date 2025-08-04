@@ -9,11 +9,11 @@ const initialState = {
   luceneQuery: "",
 };
 
-type StoreType = typeof initialState;
+export type ProductQueryStoreType = typeof initialState;
 
 export const useProductQueryStore = create<{
-  state: StoreType;
-  functions: { updateStore: (state: Partial<StoreType>) => void };
+  state: ProductQueryStoreType;
+  functions: { updateStore: (state: Partial<ProductQueryStoreType>) => void };
 }>((set) => ({
   state: {
     ...initialState,

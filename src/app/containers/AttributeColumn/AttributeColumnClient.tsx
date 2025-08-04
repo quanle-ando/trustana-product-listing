@@ -13,7 +13,7 @@ import AttributeLuceneSearchBar from "./components/AttributeLuceneSearchBar/Attr
 import { useSearchedAttributesStore } from "./model/searchedAttributes.store";
 import AttributeSorter from "./components/AttributeSorter/AttributeSorter";
 import { useIntersectionObserver } from "@/app/hooks/useIntersectionObserver";
-import { fetchAttributesUsingCurrentConditions } from "@/app/services/helpers/fetchAttributesUsingCurrentConditions.api-helper";
+import { fetchAttributesClient } from "@/app/services/helpers/fetchAttributesClient.api-helper";
 
 export default function AttributeColumnClient({
   initialAttributes,
@@ -69,7 +69,7 @@ export default function AttributeColumnClient({
         useSearchedAttributesStore.getState().functions.updateStore({
           page: useSearchedAttributesStore.getState().state.page + 1,
         });
-        fetchAttributesUsingCurrentConditions();
+        fetchAttributesClient();
       }
     },
   });

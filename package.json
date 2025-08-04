@@ -9,6 +9,7 @@
     "lint": "next lint",
     "test:dev": "vitest --run",
     "test": "NODE_ENV=test vitest --run --coverage",
+    "typecheck": "tsc",
     "prebuild": "NODE_ENV=production tsx src/app/scripts/genAntdCss.tsx",
     "postbuild": "NODE_ENV=development tsx src/app/scripts/genAntdCss.tsx",
     "docker:build": "DOCKER_BUILDKIT=1 docker build -t trustana-interview-app .",

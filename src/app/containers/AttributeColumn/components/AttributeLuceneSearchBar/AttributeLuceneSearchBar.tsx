@@ -5,7 +5,7 @@ import React from "react";
 import { useSearchedAttributesStore } from "../../model/searchedAttributes.store";
 import { useAttributesStore } from "../../model/attributes.store";
 import { useAttributeQueryStore } from "./model/attributeQuery.store";
-import { fetchAttributesUsingCurrentConditions } from "@/app/services/helpers/fetchAttributesUsingCurrentConditions.api-helper";
+import { fetchAttributesClient } from "@/app/services/helpers/fetchAttributesClient.api-helper";
 
 // e.g. "brand:(Apple OR Spartan) name:reqexp(apple) netWeightPerUnitValue>=10 NOT amazonDietType:Vegetarian"
 
@@ -27,7 +27,7 @@ export default function AttributeLuceneSearchBar() {
           page: 0,
         });
 
-        fetchAttributesUsingCurrentConditions();
+        fetchAttributesClient();
       }}
       onFocus={() => {
         useAttributesStore

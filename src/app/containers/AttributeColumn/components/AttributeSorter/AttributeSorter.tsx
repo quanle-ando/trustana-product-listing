@@ -6,7 +6,7 @@ import { twJoin } from "tailwind-merge";
 import AttributeSorterModuleCss from "./_AttributeSorter.module.css";
 import castArray from "lodash/castArray";
 import { useSearchedAttributesStore } from "../../model/searchedAttributes.store";
-import { fetchAttributesUsingCurrentConditions } from "@/app/services/helpers/fetchAttributesUsingCurrentConditions.api-helper";
+import { fetchAttributesClient } from "@/app/services/helpers/fetchAttributesClient.api-helper";
 
 const SORT_OPTIONS = [
   ["Name A-Z", "name", "ASC"],
@@ -50,7 +50,7 @@ export default function AttributeSorter() {
             ? undefined
             : { key: option.option.key, dir: option.option.dir },
         });
-        fetchAttributesUsingCurrentConditions();
+        fetchAttributesClient();
       }}
       open={open}
       onOpenChange={setOpen}

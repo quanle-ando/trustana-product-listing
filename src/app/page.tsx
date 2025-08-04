@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import ProductTableServer from "./containers/ProductTable/ProductTableServer";
 import AttributeColumnServer from "./containers/AttributeColumn/AttributeColumnServer";
 import ClientRouter from "./components/ClientRouter/ClientRouter";
-import { rehydrateStoresWithQueryParams } from "./utils/url-helpers/rehydrateStoresWithQueryParams";
 import { headers } from "next/headers";
 import Main from "./pages/Main/Main";
 
@@ -15,15 +14,11 @@ export default async function Home({
 }) {
   const queries = await searchParams;
 
-  rehydrateStoresWithQueryParams({ queries: queries });
   const reqHeaders = await headers();
-  const xTrackingId = reqHeaders.get("x-tracking-id") ?? "";
 
   return (
     <Main
-      clientRouter={
-        <ClientRouter queries={queries} xTrackingId={xTrackingId} />
-      }
+      clientRouter={<ClientRouter queries={queries} />}
       attributeClient={
         <Suspense fallback={<Skeleton active />}>
           <AttributeColumnServer />
@@ -31,7 +26,7 @@ export default async function Home({
       }
       productClient={
         <Suspense fallback={<Skeleton active data-testid="abc" />}>
-          <ProductTableServer />
+          <ProductTableServer queries={queries} />
         </Suspense>
       }
     />

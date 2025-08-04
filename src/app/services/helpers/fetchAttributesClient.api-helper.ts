@@ -1,12 +1,12 @@
+"use client";
+
 import { formatObject } from "@/app/utils/formatObject";
-import { fetchAttributes } from "../fetchAttributes.api";
+import { ATTRIBUTE_SIZE_LIMIT, fetchAttributes } from "../fetchAttributes.api";
 import { SupplierAttributeQuery } from "@/app/types/query-engine/attribute";
 import { useSearchedAttributesStore } from "@/app/containers/AttributeColumn/model/searchedAttributes.store";
 import { updateAttributeMap } from "@/app/containers/AttributeColumn/model/attributes.store";
 
-export const ATTRIBUTE_SIZE_LIMIT = 25;
-
-export async function fetchAttributesUsingCurrentConditions() {
+export async function fetchAttributesClient() {
   const store = useSearchedAttributesStore.getState();
   const page = store.state.page;
 

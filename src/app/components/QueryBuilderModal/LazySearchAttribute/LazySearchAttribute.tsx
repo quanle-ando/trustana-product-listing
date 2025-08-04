@@ -13,8 +13,10 @@ import debounce from "lodash/debounce";
 import { formatObject } from "@/app/utils/formatObject";
 import { SupplierAttributeQuery } from "@/app/types/query-engine/attribute";
 import RenderAttributeOption from "./RenderAttributeOption/RenderAttributeOption";
-import { fetchAttributes } from "@/app/services/fetchAttributes.api";
-import { ATTRIBUTE_SIZE_LIMIT } from "@/app/services/helpers/fetchAttributesUsingCurrentConditions.api-helper";
+import {
+  ATTRIBUTE_SIZE_LIMIT,
+  fetchAttributes,
+} from "@/app/services/fetchAttributes.api";
 
 export default function LazySearchAttribute({
   operationKey,
@@ -97,7 +99,9 @@ export default function LazySearchAttribute({
                   <RenderAttributeOption
                     attr={attr}
                     {...(option === arr.at(-1) && {
-                      loadMoreCallback: nextCallRef.current,
+                      loadMoreCallback: async () => {
+                        return nextCallRef.current?.();
+                      },
                     })}
                   />
                 ),

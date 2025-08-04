@@ -1,8 +1,9 @@
 import { InternalFilterValue } from "@/app/types/query-engine/common";
-import { useProductQueryStore } from "../../containers/ProductLuceneSearchBar/model/productQuery.store";
+import { ProductQueryStoreType } from "../../containers/ProductLuceneSearchBar/model/productQuery.store";
 
-export function generateProductFilters() {
-  const filters = useProductQueryStore.getState().state.filters;
+export function generateProductFilters(
+  filters: ProductQueryStoreType["filters"]
+) {
   const attributeFilters: Record<string, InternalFilterValue> = {};
   const productFilters: Record<string, InternalFilterValue> = {};
 

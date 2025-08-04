@@ -8,7 +8,6 @@ import { noop } from "lodash";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useAuthStore } from "./model/auth.store";
 
 const routerRef = {
   current: {
@@ -25,18 +24,8 @@ export function getRouter() {
   return routerRef.current;
 }
 
-export default function ClientRouter({
-  queries,
-  xTrackingId,
-}: {
-  queries: QueryType;
-  xTrackingId: string;
-}) {
+export default function ClientRouter({ queries }: { queries: QueryType }) {
   const router = useRouter();
-
-  useEffect(() => {
-    useAuthStore.getState().functions.updateStore({ xTrackingId: xTrackingId });
-  }, [xTrackingId]);
 
   useEffect(() => {
     rehydrateStoresWithQueryParams({ queries: queries });

@@ -19,7 +19,7 @@ import { usePushLuceneQueryToUrl } from "@/app/utils/url-helpers/pushLuceneQuery
 import SelectCheckbox from "./components/SelectCheckbox/SelectCheckbox";
 import RowSelectionCaretDropdownHeader from "./components/RowSelectionCaretDropdownHeader/RowSelectionCaretDropdownHeader";
 import { shareSkuIdsQueryParamsFormatter } from "@/app/utils/url-helpers/shareSkuIdsQueryParamsFormatter.url-helper";
-import { PRODUCT_SIZE_LIMIT } from "@/app/services/helpers/fetchProductsUsingCurrentConditions.api-helper";
+import { PRODUCT_SIZE_LIMIT } from "@/app/services/fetchProducts.api";
 
 const HEADER_HEIGHT = 55; // From Ant Design
 

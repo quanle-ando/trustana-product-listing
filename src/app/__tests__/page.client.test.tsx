@@ -3,8 +3,6 @@ import ProductTableServer from "../containers/ProductTable/ProductTableServer";
 import { debug } from "vitest-preview";
 import AttributeColumnServer from "../containers/AttributeColumn/AttributeColumnServer";
 import userEvent from "@testing-library/user-event";
-import { useAttributesStore } from "../containers/AttributeColumn/model/attributes.store";
-import { useAuthStore } from "@/app/components/ClientRouter/model/auth.store";
 import { sleep } from "@/app/utils/test-utils/sleep";
 import Main from "@/app/pages/Main/Main";
 
@@ -34,18 +32,13 @@ vi.mock(
 
 describe("Page.client", () => {
   it("should render client page and handle all interactions correctly", async () => {
-    useAttributesStore.getState().functions.updateStore({
-      selectedAttributes: new Set<string>([
-        "name",
-        "brand",
-        "_basicInfoRtfGeneralDescription",
-      ]),
+    const productClient = await ProductTableServer({
+      queries: {
+        attributes: ["name", "brand", "_basicInfoRtfGeneralDescription"].join(
+          ","
+        ),
+      },
     });
-    useAuthStore
-      .getState()
-      .functions.updateStore({ xTrackingId: "MOCK_TRACKING_ID" });
-
-    const productClient = await ProductTableServer();
     const attributeClient = await AttributeColumnServer();
 
     render(

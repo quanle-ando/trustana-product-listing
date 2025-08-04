@@ -1,7 +1,7 @@
 import { Product } from "@/app/types/product";
 import { VALID_DATE_FORMAT } from "@/app/utils/query-parser/parseValues.util";
 import { dayJsOrUndefined } from "@/app/utils/dayJsOrUndefined";
-import { PRODUCT_SIZE_LIMIT } from "@/app/services/helpers/fetchProductsUsingCurrentConditions.api-helper";
+import { PRODUCT_SIZE_LIMIT } from "@/app/services/fetchProducts.api";
 
 export function mapProduct({
   pdt,
